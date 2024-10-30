@@ -13,6 +13,7 @@ import java.util.List;
 class ContentPanel extends JPanel {
 	private ContentPanel contentPanel;
 	private MailAppClient mailAppClient;
+	private MailService mailService;
 	
 	JLabel senderLabel;
 	JLabel receiverLabel;
@@ -33,9 +34,11 @@ class ContentPanel extends JPanel {
 	JFileChooser fileSelector;
 	private List<File> selectedFiles = new ArrayList<>();
 
-	ContentPanel (MailAppClient client){
+	ContentPanel (MailAppClient client, MailService service){
 		contentPanel = this;
 		mailAppClient = client;
+		mailService = service;
+		
 		setLayout(null);
 		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		
@@ -67,7 +70,9 @@ class ContentPanel extends JPanel {
         sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                mailAppClient.trySendMail(senderField.getText(), receiverField.getText(), subjectField.getText(), contentArea.getText(), selectedFiles.toArray(new File[0]));
+            	mailService.connectToSmtpServer();
+            	mailService.loginToSmtpServer();
+                mailService.sendMail(senderField.getText(), receiverField.getText(), subjectField.getText(), contentArea.getText(), selectedFiles.toArray(new File[0]));
             }
         });
         
@@ -121,6 +126,18 @@ class ContentPanel extends JPanel {
 			}
 		});
         add(attachButton);
+        
+        //송신 - 수신 변환 버튼
+        JButton changeMod = new JButton("수신함");
+        changeMod.setBounds(440, 20, 100, 50);
+        add(changeMod);
+        
+        changeMod.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				mailAppClient.changeMod();
+			}
+		});
 	}
 
 }

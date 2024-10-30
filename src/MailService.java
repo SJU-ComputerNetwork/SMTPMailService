@@ -7,48 +7,68 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.swing.JOptionPane;
 
 public class MailService {
-	String smtpServer = "smtp.naver.com";
-    int port = 465;
+	private static String smtpServer = "smtp.naver.com";
+	private static int smtpPort = 465;
+ 
+    private static String pop3Server = "pop.naver.com";
+    private static int pop3Port = 995;
     
-    public SSLSocket socket;
-    public BufferedReader reader;
-    public PrintWriter writer;
+    public SSLSocket smtpSocket;
+    public BufferedReader smtpReader;
+    public PrintWriter smtpWriter;
+    
+    private String encodedId;
+    private String encodedPassword;
     
     MailService(){
+    	
+    }
+    
+    public void cachingLoginInfo(String id, String password) {
+    	encodedId = Base64.getEncoder().encodeToString(id.getBytes());
+    	encodedPassword = Base64.getEncoder().encodeToString(password.getBytes());
+    }
+    
+    public boolean connectToSmtpServer() {
     	try {
-    		socket = (SSLSocket) ((SSLSocketFactory) SSLSocketFactory.getDefault()).createSocket(smtpServer, port);
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+    		smtpSocket = (SSLSocket) ((SSLSocketFactory) SSLSocketFactory.getDefault()).createSocket(smtpServer, smtpPort);
+    		smtpReader = new BufferedReader(new InputStreamReader(smtpSocket.getInputStream()));
+            smtpWriter = new PrintWriter(new OutputStreamWriter(smtpSocket.getOutputStream()));
             
-            String response = reader.readLine();
+            String response = smtpReader.readLine();
             if (!response.startsWith("220")) {
                 showErrorMessage("SMTP 서버에 연결할 수 없습니다." + response);
-                return;
+                return false;
             }
     	}
     	catch(Exception e){
     		showErrorMessage("SMTP 서버에 연결할 수 없습니다." + e.toString());
+    		return false;
     	}
+    	return true;
     }
     
-    
-    public boolean loginToServer(String id, String password) {
+    public boolean loginToSmtpServer() {
+    	
+    	boolean connectResult = connectToSmtpServer();
+    	if(connectResult == false) {
+    		return false;
+    	}
+    	
     	try {
-            writer.println("AUTH LOGIN");
-            writer.flush();
-            checkResponse(reader.readLine(), "현재 명령어를 전송할 수 없습니다. SMTP 연결을 확인해주세요.");
+            smtpWriter.println("AUTH LOGIN");
+            smtpWriter.flush();
+            checkResponse(smtpReader.readLine(), "현재 명령어를 전송할 수 없습니다. SMTP 연결을 확인해주세요.");
 
             // 아이디 전송
-            String encodedId = Base64.getEncoder().encodeToString(id.getBytes());
-            writer.println(encodedId);
-            writer.flush();
-            checkResponse(reader.readLine(), "아이디를 확인해 주세요.");
+            smtpWriter.println(encodedId);
+            smtpWriter.flush();
+            checkResponse(smtpReader.readLine(), "아이디를 확인해 주세요.");
 
             // 비밀번호 전송
-            String encodedPassword = Base64.getEncoder().encodeToString(password.getBytes());
-            writer.println(encodedPassword);
-            writer.flush();
-            String response = reader.readLine();
+            smtpWriter.println(encodedPassword);
+            smtpWriter.flush();
+            String response = smtpReader.readLine();
 
             // 로그인 실패
             if (response.startsWith("535")) { 
@@ -68,6 +88,7 @@ public class MailService {
         }
     }
     
+    
     public boolean sendMail(String _sender, String _receiver, String _subject, String _content, File[] _attachedFile) {
     	String sender = _sender;
         String receiver = _receiver;
@@ -76,52 +97,52 @@ public class MailService {
         File[] attachedFile = _attachedFile;
         try {
         	// 발신자 설정
-            writer.write("MAIL FROM: <" + sender + ">\n");
-            writer.flush();
-            checkResponse(reader.readLine(), "발신자 설정에 실패했습니다.");
+            smtpWriter.write("MAIL FROM: <" + sender + ">\n");
+            smtpWriter.flush();
+            checkResponse(smtpReader.readLine(), "발신자 설정에 실패했습니다.");
 
             // 수신자 설정
             String[] receivers = receiver.split(",");
             for (String rc : receivers) {
             	rc = rc.trim();
                 if (!rc.isEmpty()) {
-                    writer.write("RCPT TO:<" + rc + ">\n");
-                    writer.flush();
-                    checkResponse(reader.readLine(), rc + "- 수신자 주소를 찾을 수 없습니다.");
+                    smtpWriter.write("RCPT TO:<" + rc + ">\n");
+                    smtpWriter.flush();
+                    checkResponse(smtpReader.readLine(), rc + "- 수신자 주소를 찾을 수 없습니다.");
                 }
             }
 
             // 데이터 전송 시작
-            writer.write("DATA\n");
-            writer.flush();
-            checkResponse(reader.readLine(), "데이터 전송 연결에 실패했습니다.");
+            smtpWriter.write("DATA\n");
+            smtpWriter.flush();
+            checkResponse(smtpReader.readLine(), "데이터 전송 연결에 실패했습니다.");
 
             // 이메일 헤더
-            writer.write("From: " + sender + "\r\n");
-            writer.write("To: " + String.join(", ", receivers) + "\r\n");
-            writer.write("Subject: " + subject + "\r\n");
-            writer.write("Content-Type: multipart/mixed; boundary=frontier\r\n");
-            writer.write("\r\n");
+            smtpWriter.write("From: " + sender + "\r\n");
+            smtpWriter.write("To: " + String.join(", ", receivers) + "\r\n");
+            smtpWriter.write("Subject: " + subject + "\r\n");
+            smtpWriter.write("Content-Type: multipart/mixed; boundary=frontier\r\n");
+            smtpWriter.write("\r\n");
 
             // 이메일 본문
-            writer.write("--frontier\r\n");
-            writer.write("Content-Type: text/plain\r\n");
-            writer.write("\r\n");
-            writer.write(content + "\r\n");
+            smtpWriter.write("--frontier\r\n");
+            smtpWriter.write("Content-Type: text/plain\r\n");
+            smtpWriter.write("\r\n");
+            smtpWriter.write(content + "\r\n");
             
             
             // 첨부 파일 전송
             for (File file : attachedFile) {
-                writer.write("--frontier\r\n");
-                writer.write("Content-Type: application/octet-stream\r\n");
-                writer.write("Content-Transfer-Encoding: base64\r\n");
-                writer.write("Content-Disposition: attachment; filename=\"" + file.getName() + "\"\r\n");
-                writer.write("\r\n");
+                smtpWriter.write("--frontier\r\n");
+                smtpWriter.write("Content-Type: application/octet-stream\r\n");
+                smtpWriter.write("Content-Transfer-Encoding: base64\r\n");
+                smtpWriter.write("Content-Disposition: attachment; filename=\"" + file.getName() + "\"\r\n");
+                smtpWriter.write("\r\n");
 
                 try {
                     byte[] fileContent = Files.readAllBytes(file.toPath());
                     String encodedFile = Base64.getEncoder().encodeToString(fileContent);
-                    writer.write(encodedFile + "\r\n");
+                    smtpWriter.write(encodedFile + "\r\n");
                 } catch (Exception e) {
                     throw new Exception("첨부 파일 전송 중 오류가 발생했습니다: " + file.getName());
                 }
@@ -129,11 +150,11 @@ public class MailService {
             
             
             // 이메일 송신 종료
-            writer.write("--frontier--\r\n");
-            writer.write(".\r\n");
-            writer.flush();
+            smtpWriter.write("--frontier--\r\n");
+            smtpWriter.write(".\r\n");
+            smtpWriter.flush();
             showDialogMessage("성공적으로 메일을 전송하였습니다.");
-            checkResponse(reader.readLine(), "메시지 전송에 실패했습니다.");
+            checkResponse(smtpReader.readLine(), "메시지 전송에 실패했습니다.");
         }
         catch(Exception e){
         	showErrorMessage(e.toString());

@@ -18,6 +18,8 @@ public class MailAppClient extends JFrame{
 	private CardLayout cardLayout;
 	private MailService mailService;
 	
+	private char mode = 'c';
+	
 	MailAppClient(){
 		mailService = new MailService();
 		
@@ -26,8 +28,9 @@ public class MailAppClient extends JFrame{
 
 		cardLayout = new CardLayout();
 		mainPanel = new JPanel(cardLayout);
-        mainPanel.add(new LoginPanel(this), "LoginPanel");
-        mainPanel.add(new ContentPanel(this), "contentPanel");
+        mainPanel.add(new LoginPanel(this, mailService), "LoginPanel");
+        mainPanel.add(new ContentPanel(this, mailService), "contentPanel");
+        mainPanel.add(new ReceiverPanel(this), "ReceiverPanel");
 		getContentPane().add(mainPanel, BorderLayout.CENTER);
 		
 		
@@ -44,21 +47,28 @@ public class MailAppClient extends JFrame{
 		setVisible(true);
 	}
 	
-	public void trySendMail(String _sender, String _receiver, String _subject, String _content, File[] _attachedFile) {
-		mailService.sendMail(_sender, _receiver, _subject, _content, _attachedFile);
-	}
 	
-	public void tryLoginToServer(String id, String password) {
-		boolean loginResult = mailService.loginToServer(id, password);
-		if(loginResult)
-			successLogin();
-	}
-	
-	private void successLogin() {
+	public void showContentPanel() {
 		cardLayout.show(mainPanel, "contentPanel");
 		setSize(600, 400);
 	}
 	
+	public void showReceiverPanel() {
+		cardLayout.show(mainPanel, "ReceiverPanel");
+		setSize(600, 400);
+	}
+	
+	
+	public void changeMod() {
+		if (mode == 'c') {
+			mode = 'r';
+			showReceiverPanel();
+		}
+		else if (mode == 'r') {
+			mode = 'c';
+			showContentPanel();
+		}
+	}
 	
 	
 	public static void main(String[] args) {

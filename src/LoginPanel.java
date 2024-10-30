@@ -8,9 +8,11 @@ import javax.swing.*;
 public class LoginPanel extends JPanel {
 	
 	private MailAppClient mailAppClient;
+	private MailService mailService;
 	
-	LoginPanel(MailAppClient client){
+	LoginPanel(MailAppClient client, MailService service){
 		mailAppClient = client;
+		mailService = service;
 		
 		setLayout(new BorderLayout(0, 0));
 		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
@@ -95,8 +97,8 @@ public class LoginPanel extends JPanel {
             	String idString = idField.getText();
             	char[] passwordChars = passwordField.getPassword();
                 String passwordString = new String(passwordChars);
-                
-                mailAppClient.tryLoginToServer(idString, passwordString);
+                mailService.cachingLoginInfo(idString, passwordString);
+                mailAppClient.showContentPanel();
             }
         });
         
