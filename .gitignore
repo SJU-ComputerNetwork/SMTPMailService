@@ -1,0 +1,14 @@
+# Java 빌드 결과물
+*.class
+
+# 로그 파일
+*.log
+
+# IntelliJ IDEA 설정 파일
+.idea/
+*.iml
+
+# Eclipse 설정 파일
+.project
+.classpath
+.settings/
