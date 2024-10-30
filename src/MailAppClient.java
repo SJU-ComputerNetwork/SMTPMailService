@@ -16,18 +16,18 @@ import java.util.Map;
 public class MailAppClient extends JFrame{
 	private JPanel mainPanel;
 	private CardLayout cardLayout;
-	
+	private MailService mailService;
 	
 	MailAppClient(){
+		mailService = new MailService();
+		
 		setTitle("MailAppClient");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
+
 		cardLayout = new CardLayout();
 		mainPanel = new JPanel(cardLayout);
         mainPanel.add(new LoginPanel(this), "LoginPanel");
         mainPanel.add(new ContentPanel(this), "contentPanel");
-
-        
 		getContentPane().add(mainPanel, BorderLayout.CENTER);
 		
 		
@@ -45,15 +45,18 @@ public class MailAppClient extends JFrame{
 		setVisible(true);
 	}
 	
+	public void tryLoginToServer(String id, String password) {
+		boolean loginResult = mailService.loginToServer(id, password);
+		if(loginResult)
+			successLogin();
+	}
 	
-	public void successLogin() {
+	private void successLogin() {
 		cardLayout.show(mainPanel, "contentPanel");
 		setSize(450, 550);
 	}
 	
-	public void failLogin() {
-		
-	}
+	
 	
 	public static void main(String[] args) {
 		new MailAppClient();

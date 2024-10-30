@@ -2,6 +2,7 @@ import javax.swing.JPanel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Base64;
 
 import javax.swing.*;
 public class LoginPanel extends JPanel {
@@ -20,7 +21,7 @@ public class LoginPanel extends JPanel {
 	}
 	
 	
-	 // 제목 패널 생성
+	 // 제목 섹션 생성
     private JPanel createTitlePanel() {
         JPanel titlePanel = new JPanel();
         titlePanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 0)); // Padding 추가
@@ -33,7 +34,7 @@ public class LoginPanel extends JPanel {
     }
     
     
-    // 설명 패널 생성
+    // 설명 섹션 생성
     private JPanel createDescriptionPanel() {
         JPanel descriptionPanel = new JPanel(new BorderLayout());
         descriptionPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 10));
@@ -52,7 +53,7 @@ public class LoginPanel extends JPanel {
     }
 
     
-    // 로그인 패널 생성
+    // 로그인 입력 섹션 생성
     private JPanel createLoginPanel() {
         JPanel loginPanel = new JPanel(new BorderLayout());
         loginPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
@@ -70,7 +71,7 @@ public class LoginPanel extends JPanel {
         JPasswordField passwordField = new JPasswordField(14);
         passwordField.setBorder(BorderFactory.createLineBorder(Color.GREEN));
 
-        // ID와 Password 필드 배치
+        // ID와 Password Field 배치
         gbc.gridx = 0;
         gbc.gridy = 0;
         inputSection.add(idLabel, gbc);
@@ -85,15 +86,18 @@ public class LoginPanel extends JPanel {
         gbc.gridx = 1;
         inputSection.add(passwordField, gbc);
 
-        // 로그인 버튼을 ID/Password 필드 오른쪽에 위치
+        // 로그인 버튼 생성, 버튼 클릭 이벤트에 로그인 기능 등록
         JButton loginButton = new JButton("   Login   ");
         loginButton.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-            	mailAppClient.successLogin();
+            	String idString = idField.getText();
+            	char[] passwordChars = passwordField.getPassword();
+                String passwordString = new String(passwordChars);
+                
+                mailAppClient.tryLoginToServer(idString, passwordString);
             }
-
         });
         
         gbc.gridx = 2;
