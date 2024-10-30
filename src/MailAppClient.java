@@ -38,11 +38,14 @@ public class MailAppClient extends JFrame{
 		
 		JPanel exitButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		exitButtonPanel.add(exitButton);
-		
 		getContentPane().add(exitButtonPanel, BorderLayout.SOUTH);
 		
 		setSize(350, 450);
 		setVisible(true);
+	}
+	
+	public void trySendMail(String _sender, String _receiver, String _subject, String _content, File[] _attachedFile) {
+		mailService.sendMail(_sender, _receiver, _subject, _content, _attachedFile);
 	}
 	
 	public void tryLoginToServer(String id, String password) {
@@ -53,7 +56,7 @@ public class MailAppClient extends JFrame{
 	
 	private void successLogin() {
 		cardLayout.show(mainPanel, "contentPanel");
-		setSize(450, 550);
+		setSize(600, 400);
 	}
 	
 	

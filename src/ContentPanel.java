@@ -5,71 +5,122 @@ import javax.swing.border.*;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 
 class ContentPanel extends JPanel {
-	
+	private ContentPanel contentPanel;
 	private MailAppClient mailAppClient;
 	
+	JLabel senderLabel;
+	JLabel receiverLabel;
+	JLabel subjectLabel;
+	JLabel fileLabel;
+	JLabel fileListLabel;
+	
+	JTextField senderField;
+	JTextField receiverField;
+	JTextField subjectField;
+	
+	JButton sendButton;
+	JButton attachButton;
+	
+	JTextArea contentArea;
+	
+	JTextArea fileField;
+	JFileChooser fileSelector;
+	private List<File> selectedFiles = new ArrayList<>();
+
 	ContentPanel (MailAppClient client){
+		contentPanel = this;
 		mailAppClient = client;
-		setLayout(new BorderLayout(10, 10));
+		setLayout(null);
 		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		
 		// Sender 라벨 및 텍스트 필드
-        JLabel senderLabel = new JLabel("Sender");
-        senderLabel.setBounds(240, 10, 70, 20);
+        senderLabel = new JLabel("Sender");
+        senderLabel.setBounds(20, 15, 70, 20);
         add(senderLabel);
 
-        JTextField senderField = new JTextField();
-        senderField.setBounds(320, 10, 170, 20);
+        senderField = new JTextField();
+        senderField.setBounds(100, 20, 170, 20);
         add(senderField);
 
         // Reciever 라벨 및 텍스트 필드
-        JLabel receiverLabel = new JLabel("Reciever");
-        receiverLabel.setBounds(240, 40, 70, 20);
+        receiverLabel = new JLabel("Reciever");
+        receiverLabel.setBounds(20, 45, 70, 20);
         add(receiverLabel);
 
-        JTextField receiverField = new JTextField();
-        receiverField.setBounds(320, 40, 170, 20);
+        receiverField = new JTextField();
+        receiverField.setBounds(100, 50, 170, 20);
         add(receiverField);
 
+        
         // Send 버튼
-        JButton sendButton = new JButton("Send");
-        sendButton.setBounds(500, 10, 80, 50);
+        sendButton = new JButton("전송");
+        sendButton.setBounds(450, 270, 80, 30);
         add(sendButton);
+        
 
-        // Attach 버튼
-        JButton exitButton = new JButton("Attach");
-        exitButton.setBounds(500, 70, 80, 50);
-        add(exitButton);
-
+        sendButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mailAppClient.trySendMail(senderField.getText(), receiverField.getText(), subjectField.getText(), contentArea.getText(), selectedFiles.toArray(new File[0]));
+            }
+        });
+        
+        
         // Subject 라벨 및 텍스트 필드
-        JLabel subjectLabel = new JLabel("Subject");
-        subjectLabel.setBounds(10, 80, 50, 20);
+        subjectLabel = new JLabel("Subject");
+        subjectLabel.setBounds(20, 80, 50, 20);
         add(subjectLabel);
 
-        JTextField subjectField = new JTextField();
-        subjectField.setBounds(10, 100, 370, 20);
+        subjectField = new JTextField();
+        subjectField.setBounds(20, 100, 370, 20);
         add(subjectField);
 
-        // Text 영역
-        JTextArea textArea = new JTextArea();
-        textArea.setBounds(10, 130, 370, 220);
-        add(textArea);
+        // Content 영역
+        contentArea = new JTextArea();
+        contentArea.setBounds(20, 130, 380, 170);
+        contentArea.setLineWrap(true); 
+        add(contentArea);
 
-        // File 라벨
-        JLabel fileLabel = new JLabel("File");
-        fileLabel.setBounds(390, 80, 50, 20);
-        add(fileLabel);
         
-        // Filelist 라벨
-        JLabel fileListLabel = new JLabel();
-        EtchedBorder border;
-        border = new EtchedBorder(EtchedBorder.RAISED);
-        fileListLabel.setBorder(border);
-        fileListLabel.setBounds(390, 130, 190, 220);
-        add(fileListLabel);
+        // 파일 첨부 관련
+        fileField = new JTextArea();
+        fileField.setBounds(430, 130, 120, 100);
+        fileField.setEditable(false);
+        add(fileField);
+        
+        
+        fileSelector = new JFileChooser();
+        fileSelector.setMultiSelectionEnabled(true);
+        
+        
+        attachButton = new JButton("파일 첨부");
+        attachButton.setBounds(430, 90, 90, 30);
+        attachButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+	            int check = fileSelector.showOpenDialog(contentPanel);
+	            if (check == JFileChooser.APPROVE_OPTION) {
+	                File[] selectedFilesArray = fileSelector.getSelectedFiles();
+	                for (File file : selectedFilesArray) {
+	                	selectedFiles.add(file);
+	                }
+	                StringBuilder fileNames = new StringBuilder();
+	                for (File file : selectedFiles) {
+	                    if (fileNames.length() > 0) fileNames.append("\n");
+	                    fileNames.append(file.getName());
+	                }
+	                fileField.setText(fileNames.toString());
+	            }
+	            selectedFiles.clear();
+			}
+		});
+        add(attachButton);
 	}
 
 }

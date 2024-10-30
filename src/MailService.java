@@ -1,4 +1,5 @@
 import java.io.*;
+import java.nio.file.Files;
 import java.util.Base64;
 
 import javax.net.ssl.SSLSocket;
@@ -67,19 +68,94 @@ public class MailService {
         }
     }
     
-    
+    public boolean sendMail(String _sender, String _receiver, String _subject, String _content, File[] _attachedFile) {
+    	String sender = _sender;
+        String receiver = _receiver;
+        String subject = _subject;
+        String content = _content;
+        File[] attachedFile = _attachedFile;
+        try {
+        	// 발신자 설정
+            writer.write("MAIL FROM: <" + sender + ">\n");
+            writer.flush();
+            checkResponse(reader.readLine(), "발신자 설정에 실패했습니다.");
+
+            // 수신자 설정
+            String[] receivers = receiver.split(",");
+            for (String rc : receivers) {
+            	rc = rc.trim();
+                if (!rc.isEmpty()) {
+                    writer.write("RCPT TO:<" + rc + ">\n");
+                    writer.flush();
+                    checkResponse(reader.readLine(), rc + "- 수신자 주소를 찾을 수 없습니다.");
+                }
+            }
+
+            // 데이터 전송 시작
+            writer.write("DATA\n");
+            writer.flush();
+            checkResponse(reader.readLine(), "데이터 전송 연결에 실패했습니다.");
+
+            // 이메일 헤더
+            writer.write("From: " + sender + "\r\n");
+            writer.write("To: " + String.join(", ", receivers) + "\r\n");
+            writer.write("Subject: " + subject + "\r\n");
+            writer.write("Content-Type: multipart/mixed; boundary=frontier\r\n");
+            writer.write("\r\n");
+
+            // 이메일 본문
+            writer.write("--frontier\r\n");
+            writer.write("Content-Type: text/plain\r\n");
+            writer.write("\r\n");
+            writer.write(content + "\r\n");
+            
+            
+            // 첨부 파일 전송
+            for (File file : attachedFile) {
+                writer.write("--frontier\r\n");
+                writer.write("Content-Type: application/octet-stream\r\n");
+                writer.write("Content-Transfer-Encoding: base64\r\n");
+                writer.write("Content-Disposition: attachment; filename=\"" + file.getName() + "\"\r\n");
+                writer.write("\r\n");
+
+                try {
+                    byte[] fileContent = Files.readAllBytes(file.toPath());
+                    String encodedFile = Base64.getEncoder().encodeToString(fileContent);
+                    writer.write(encodedFile + "\r\n");
+                } catch (Exception e) {
+                    throw new Exception("첨부 파일 전송 중 오류가 발생했습니다: " + file.getName());
+                }
+            }
+            
+            
+            // 이메일 송신 종료
+            writer.write("--frontier--\r\n");
+            writer.write(".\r\n");
+            writer.flush();
+            showDialogMessage("성공적으로 메일을 전송하였습니다.");
+            checkResponse(reader.readLine(), "메시지 전송에 실패했습니다.");
+        }
+        catch(Exception e){
+        	showErrorMessage(e.toString());
+        }
+        return true;
+    }
     
     
     
     // 응답 메세지를 확인한 후, n-smtp의 에러 메시지인 4나 5로 시작하는 코드이면 예외를 던지고 에러 메세지를 출력
     private static void checkResponse(String response, String errorMessage) throws IOException {
         if (response == null || response.startsWith("4") || response.startsWith("5")) {
-            throw new IOException(errorMessage);
+            throw new IOException(errorMessage + ", " + response);
         }
     }
     
     
     private static void showErrorMessage(String message) {
         JOptionPane.showMessageDialog(null, message, "error", JOptionPane.WARNING_MESSAGE);
+    }
+    
+    private static void showDialogMessage(String message) {
+        JOptionPane.showMessageDialog(null, message, "completed", JOptionPane.INFORMATION_MESSAGE);
     }
 }

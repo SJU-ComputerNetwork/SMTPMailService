@@ -38,12 +38,12 @@ public class LoginPanel extends JPanel {
     private JPanel createDescriptionPanel() {
         JPanel descriptionPanel = new JPanel(new BorderLayout());
         descriptionPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 10));
-        JLabel descriptionLabel = new JLabel("<html>설명...................................................<br><br>" +
-                "1..........................................................<br><br>" +
-                "2..........................................................<br><br>" +
-                "3..........................................................<br><br>" +
-                "4..........................................................<br><br>" +
-                "5..........................................................</html>");
+        JLabel descriptionLabel = new JLabel(
+        		"<html>1. 본 어플리케이션은 네이버 메일 서버에 접속합니다. 따라서 네이버 아이디로 접속해주세요.<br><br>" +
+                "2. 로그인이 안 될 경우 아래 사항을 확인해주세요.<br>" +
+                " 		- 2단계 인증을 사용하는 경우, 네이버에서 어플리케이션 암호를 따로 만들어서 사용해야 합니다.<br>" +
+                " 		- 네이버 메일 설정에서 SMTP 사용 옵션 체크해주세요.<br><br>" +
+                "3. 서버 상황에 따라 가끔 접속이 안 될 수도 있습니다. 접속이 안되면 껐다가 다시 켜주세요.</html>");
         Font font = new Font("굴림", Font.BOLD, 13);
         descriptionLabel.setFont(font);
         descriptionLabel.setHorizontalAlignment(JLabel.CENTER);
