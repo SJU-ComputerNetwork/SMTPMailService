@@ -68,6 +68,9 @@ public class MailService {
     }
     
     
+    
+    
+    
     // 응답 메세지를 확인한 후, n-smtp의 에러 메시지인 4나 5로 시작하는 코드이면 예외를 던지고 에러 메세지를 출력
     private static void checkResponse(String response, String errorMessage) throws IOException {
         if (response == null || response.startsWith("4") || response.startsWith("5")) {
