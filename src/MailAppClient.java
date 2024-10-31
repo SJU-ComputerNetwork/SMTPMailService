@@ -29,10 +29,12 @@ public class MailAppClient extends JFrame{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		receiverPanel = new ReceiverPanel(this, pop3MailService);
+		
+		
 		cardLayout = new CardLayout();
 		mainPanel = new JPanel(cardLayout);
         mainPanel.add(new LoginPanel(this, smtpMailService, pop3MailService), "LoginPanel");
-        mainPanel.add(new ContentPanel(this, smtpMailService, pop3MailService, receiverPanel), "ContentPanel");
+        mainPanel.add(new ContentPanel(this, smtpMailService), "ContentPanel");
         mainPanel.add(receiverPanel, "ReceiverPanel");
 		getContentPane().add(mainPanel, BorderLayout.CENTER);
 		
@@ -70,6 +72,8 @@ public class MailAppClient extends JFrame{
 	public void changeMod() {
 		if (mode == 'c') {
 			mode = 'r';
+			pop3MailService.receiveMail();
+			receiverPanel.fetchReceiveMail();
 			showReceiverPanel();
 		}
 		else if (mode == 'r') {
