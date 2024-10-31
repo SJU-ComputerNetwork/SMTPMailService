@@ -22,7 +22,7 @@ public class ReceiverPanel extends JPanel{
 		
 		
 		JButton changeMod = new JButton("메일쓰기");
-		changeMod.setBounds(5, 10, 82, 50);
+		changeMod.setBounds(5, 10, 90, 50);
 		changeMod.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -33,7 +33,7 @@ public class ReceiverPanel extends JPanel{
 		
 		
 		JButton refreshBtn = new JButton("새로고침");
-		refreshBtn.setBounds(92, 10, 82, 50);
+		refreshBtn.setBounds(5, 70, 90, 50);
 		refreshBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -45,29 +45,29 @@ public class ReceiverPanel extends JPanel{
 		
 		
 		JLabel RecievedMailLabel = new JLabel("수신함");
-		RecievedMailLabel.setBounds(180, 25, 60, 20);
+		RecievedMailLabel.setBounds(200, 70, 40, 20);
         add(RecievedMailLabel);
         
         JLabel senderLabel = new JLabel("Sender");
-        senderLabel.setBounds(100, 70, 50, 20);
+        senderLabel.setBounds(100, 170, 50, 20);
         add(senderLabel);
 
 		JLabel subjectLabel = new JLabel("Subject");
-        subjectLabel.setBounds(10, 80, 50, 20);
+        subjectLabel.setBounds(10, 180, 50, 20);
         add(subjectLabel);
 
         senderField = new JTextField();
-        senderField.setBounds(180, 70, 400, 20);
+        senderField.setBounds(180, 170, 400, 20);
         senderField.setEditable(false);
         add(senderField);
         
         subjectField = new JTextField();
-        subjectField.setBounds(10, 100, 570, 20);
+        subjectField.setBounds(10, 200, 570, 20);
         subjectField.setEditable(false);
         add(subjectField);
 
         textArea = new JTextArea();
-        textArea.setBounds(10, 130, 570, 220);
+        textArea.setBounds(10, 230, 570, 220);
         textArea.setEditable(false);
         add(textArea);
         
@@ -86,7 +86,7 @@ public class ReceiverPanel extends JPanel{
         JList<String> mailList = new JList<>(EmailSubjects);
         mailList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane mailListScrollPane = new JScrollPane(mailList);
-        mailListScrollPane.setBounds(250, 10, 330, 50);
+        mailListScrollPane.setBounds(250, 10, 330, 150);
         EtchedBorder border = new EtchedBorder(EtchedBorder.RAISED);
         mailListScrollPane.setBorder(border);
         add(mailListScrollPane);
