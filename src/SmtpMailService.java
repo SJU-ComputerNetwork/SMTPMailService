@@ -6,19 +6,16 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.swing.JOptionPane;
 
-public class MailService {
+public class SmtpMailService {
 	private MailAppClient mailAppClient;
 	
-	private static String smtpServer = "smtp.naver.com";
-	private static int smtpPort = 465;
+	private static final String smtpServer = "smtp.naver.com";
+	private static final int smtpPort = 465;
  
-    private static String pop3Server = "pop.naver.com";
-    private static int pop3Port = 995;
-    
     private String encodedId;
     private String encodedPassword;
     
-    MailService(MailAppClient client){
+    SmtpMailService(MailAppClient client){
     	mailAppClient = client;
     }
     
@@ -37,12 +34,11 @@ public class MailService {
         // 아이디 전송
         writer.println(encodedId);
         writer.flush();
-        checkLoginResponse(reader.readLine(), "입력한 아이디를 찾을 수 없습니다.");
 
         // 비밀번호 전송
         writer.println(encodedPassword);
         writer.flush();
-        checkLoginResponse(reader.readLine(), "\n로그인을 할 수 없습니다. \n 1. 비밀번호를 확인해주세요. \n 2. 네이버에서 SMTP 사용 허가를 설정해주세요. \n 3. 2단계 인증이 설정된 경우, 별도의 어플리케이션 비밀번호가 필요합니다.");
+        checkLoginResponse(reader.readLine(), "\n로그인을 할 수 없습니다. \n 1. 아이디와 비밀번호를 확인해주세요. \n 2. 네이버에서 SMTP 사용 허가를 설정해주세요. \n 3. 2단계 인증이 설정된 경우, 별도의 어플리케이션 비밀번호가 필요합니다.");
     }
     
     
@@ -112,7 +108,7 @@ public class MailService {
     			BufferedReader reader = new BufferedReader(new InputStreamReader(smtpSocket.getInputStream()));
     			PrintWriter writer = new PrintWriter(new OutputStreamWriter(smtpSocket.getOutputStream()));
     			){
-    		checkResponse(reader.readLine(), "STMP 서버 접속");
+    		checkResponse(reader.readLine(), "현재 STMP 서버에 접속할 수 없습니다.");
 
             authenticateToServer(reader, writer);
 

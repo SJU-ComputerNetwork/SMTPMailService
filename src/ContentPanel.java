@@ -13,7 +13,8 @@ import java.util.List;
 class ContentPanel extends JPanel {
 	private ContentPanel contentPanel;
 	private MailAppClient mailAppClient;
-	private MailService mailService;
+	private SmtpMailService smtpMailService;
+	private Pop3MailService pop3MailService;
 	
 	JLabel senderLabel;
 	JLabel receiverLabel;
@@ -35,10 +36,11 @@ class ContentPanel extends JPanel {
 	private List<File> selectedFiles = new ArrayList<>();
 
 	
-	ContentPanel (MailAppClient client, MailService service){
+	ContentPanel (MailAppClient client, SmtpMailService smtpService, Pop3MailService pop3Service){
 		contentPanel = this;
 		mailAppClient = client;
-		mailService = service;
+		smtpMailService = smtpService;
+		pop3MailService = pop3Service;
 		
 		setLayout(null);
 		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -71,7 +73,7 @@ class ContentPanel extends JPanel {
         sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                mailService.sendMail(senderField.getText(), receiverField.getText(), subjectField.getText(), contentArea.getText(), selectedFiles.toArray(new File[0]));
+                smtpMailService.sendMail(senderField.getText(), receiverField.getText(), subjectField.getText(), contentArea.getText(), selectedFiles.toArray(new File[0]));
             }
         });
         
@@ -135,6 +137,7 @@ class ContentPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				mailAppClient.changeMod();
+				pop3Service.receiveMail();
 			}
 		});
 	}

@@ -4,11 +4,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-class
-ReceiveEmail {
-    private String sender;
-    private String subject;
-    private String content;
+class ReceiveEmail {
+    public String sender;
+    public String subject;
+    public String content;
 
     public ReceiveEmail(String sender, String subject, String content) {
         this.sender = decodeMime(sender);

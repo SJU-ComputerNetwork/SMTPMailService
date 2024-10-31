@@ -12,3 +12,5 @@
 .project
 .classpath
 .settings/
+
+temp/

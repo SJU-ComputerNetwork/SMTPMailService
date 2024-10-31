@@ -16,21 +16,22 @@ import java.util.Map;
 public class MailAppClient extends JFrame{
 	private JPanel mainPanel;
 	private CardLayout cardLayout;
-	private MailService mailService;
+	private SmtpMailService smtpMailService;
+	private Pop3MailService pop3MailService;
 	
 	private char mode = 'c';
 	
 	MailAppClient(){
-		mailService = new MailService(this);
-		
+		smtpMailService = new SmtpMailService(this);
+		pop3MailService = new Pop3MailService(this);
 		setTitle("MailAppClient");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		cardLayout = new CardLayout();
 		mainPanel = new JPanel(cardLayout);
-        mainPanel.add(new LoginPanel(this, mailService), "LoginPanel");
-        mainPanel.add(new ContentPanel(this, mailService), "ContentPanel");
-        mainPanel.add(new ReceiverPanel(this), "ReceiverPanel");
+        mainPanel.add(new LoginPanel(this, smtpMailService, pop3MailService), "LoginPanel");
+        mainPanel.add(new ContentPanel(this, smtpMailService, pop3MailService), "ContentPanel");
+        mainPanel.add(new ReceiverPanel(this, pop3MailService), "ReceiverPanel");
 		getContentPane().add(mainPanel, BorderLayout.CENTER);
 		
 		
