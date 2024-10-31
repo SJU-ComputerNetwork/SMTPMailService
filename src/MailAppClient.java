@@ -21,7 +21,7 @@ public class MailAppClient extends JFrame{
 	private char mode = 'c';
 	
 	MailAppClient(){
-		mailService = new MailService();
+		mailService = new MailService(this);
 		
 		setTitle("MailAppClient");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -29,7 +29,7 @@ public class MailAppClient extends JFrame{
 		cardLayout = new CardLayout();
 		mainPanel = new JPanel(cardLayout);
         mainPanel.add(new LoginPanel(this, mailService), "LoginPanel");
-        mainPanel.add(new ContentPanel(this, mailService), "contentPanel");
+        mainPanel.add(new ContentPanel(this, mailService), "ContentPanel");
         mainPanel.add(new ReceiverPanel(this), "ReceiverPanel");
 		getContentPane().add(mainPanel, BorderLayout.CENTER);
 		
@@ -48,8 +48,13 @@ public class MailAppClient extends JFrame{
 	}
 	
 	
+	public void showLoginPanel() {
+		cardLayout.show(mainPanel, "LoginPanel");
+		setSize(350, 450);
+	}
+	
 	public void showContentPanel() {
-		cardLayout.show(mainPanel, "contentPanel");
+		cardLayout.show(mainPanel, "ContentPanel");
 		setSize(600, 400);
 	}
 	

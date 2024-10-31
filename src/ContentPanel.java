@@ -34,6 +34,7 @@ class ContentPanel extends JPanel {
 	JFileChooser fileSelector;
 	private List<File> selectedFiles = new ArrayList<>();
 
+	
 	ContentPanel (MailAppClient client, MailService service){
 		contentPanel = this;
 		mailAppClient = client;
@@ -70,8 +71,6 @@ class ContentPanel extends JPanel {
         sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-            	mailService.connectToSmtpServer();
-            	mailService.loginToSmtpServer();
                 mailService.sendMail(senderField.getText(), receiverField.getText(), subjectField.getText(), contentArea.getText(), selectedFiles.toArray(new File[0]));
             }
         });
