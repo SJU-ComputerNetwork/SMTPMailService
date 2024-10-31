@@ -38,6 +38,7 @@ public class ReceiverPanel extends JPanel{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				pop3MailService.receiveMail();
+				fetchReceiveMail();
 			}
 		});
 		add(refreshBtn);
@@ -91,7 +92,7 @@ public class ReceiverPanel extends JPanel{
         add(mailListScrollPane);
         
         
-     // JList 항목 선택 시 Email 데이터 표시
+        // JList 항목 선택 시 Email 데이터 표시
         mailList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) { // 값이 최종적으로 선택될 때만 동작
                 int selectedIndex = mailList.getSelectedIndex();

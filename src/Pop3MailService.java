@@ -22,9 +22,7 @@ public class Pop3MailService {
     }
     
     public void cachingLoginInfo(String id, String password) {
-    	//encodedId = Base64.getEncoder().encodeToString(id.getBytes());
     	encodedId = id;
-    	//encodedPassword = Base64.getEncoder().encodeToString(password.getBytes());
     	encodedPassword = password;
     }
     
