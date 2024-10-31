@@ -1,6 +1,8 @@
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -10,9 +12,15 @@ public class ReceiverPanel extends JPanel{
 	private MailAppClient mailAppClient;
 	private Pop3MailService pop3MailService;
 	
+	// 아래 mailJList와 혼동 주의! , mailJList는 UI임
+	private List<ReceiveEmail> mailList = new ArrayList<ReceiveEmail>();
+	
 	JTextField senderField;
 	JTextField subjectField;
 	JTextArea textArea;
+	
+	DefaultListModel<String> listModel;
+	JList<String> mailJList;
 	
 	ReceiverPanel (MailAppClient client, Pop3MailService service){
 		mailAppClient = client;
@@ -37,7 +45,6 @@ public class ReceiverPanel extends JPanel{
 		refreshBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				pop3MailService.receiveMail();
 				fetchReceiveMail();
 			}
 		});
@@ -71,39 +78,50 @@ public class ReceiverPanel extends JPanel{
         textArea.setEditable(false);
         add(textArea);
         
-        setVisible(true);
-	}
-	
-	public void fetchReceiveMail() {
-		ReceiveEmail[] emailArray = pop3MailService.receiveMail();
-		
-		String[] EmailSubjects = new String[emailArray.length];
-        for (int i = 0; i < emailArray.length; i++) {
-            EmailSubjects[i] = emailArray[i].subject;
-        }
+        listModel = new DefaultListModel<>();
+        mailJList = new JList<>(listModel);
+        mailJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
-        // JList 생성 및 JScrollPane에 추가
-        JList<String> mailList = new JList<>(EmailSubjects);
-        mailList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        JScrollPane mailListScrollPane = new JScrollPane(mailList);
+        // JList 항목 선택 시 Email 데이터 표시
+        mailJList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) { // 값이 최종적으로 선택될 때만 동작
+                int selectedIndex = mailJList.getSelectedIndex();
+                System.out.println(selectedIndex);
+                if (selectedIndex != -1) {
+                    ReceiveEmail selectedEmail = mailList.get(selectedIndex);
+                    subjectField.setText(selectedEmail.subject);
+                    senderField.setText(selectedEmail.sender);
+                    textArea.setText(selectedEmail.content + "\n\n");
+                    
+                    for(String fileName : selectedEmail.fileNameList) {
+                    	textArea.setText(textArea.getText() + "첨부파일 : " + fileName +'\n');
+                    }
+                }
+            }
+        });
+        
+        JScrollPane mailListScrollPane = new JScrollPane(mailJList);
         mailListScrollPane.setBounds(250, 10, 330, 150);
         EtchedBorder border = new EtchedBorder(EtchedBorder.RAISED);
         mailListScrollPane.setBorder(border);
         add(mailListScrollPane);
         
-        
-        // JList 항목 선택 시 Email 데이터 표시
-        mailList.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) { // 값이 최종적으로 선택될 때만 동작
-                int selectedIndex = mailList.getSelectedIndex();
-                if (selectedIndex != -1) {
-                    ReceiveEmail selectedEmail = emailArray[selectedIndex];
-                    subjectField.setText(selectedEmail.subject);
-                    senderField.setText(selectedEmail.sender);
-                    textArea.setText(selectedEmail.content);
-                }
-            }
-        });
+        setVisible(true);
 	}
 	
+	
+	public void fetchReceiveMail() {
+		mailList.clear();
+		listModel.clear();
+		mailJList.clearSelection();
+		
+		ReceiveEmail[] emailArray = pop3MailService.receiveMail();
+
+		// 리스트 모델에 메일 제목 추가
+	    for (ReceiveEmail email : emailArray) {
+	    	mailList.add(email);
+	        listModel.addElement(email.subject);
+	    }
+	}
+
 }

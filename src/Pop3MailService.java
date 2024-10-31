@@ -80,7 +80,7 @@ public class Pop3MailService {
     
      
     // 각 메일을 가져와 ReceiveEmail 객체로 변환
-    private ReceiveEmail fetchEmail(BufferedReader reader, PrintWriter writer, int emailIndex) throws IOException {
+    private ReceiveEmail fetchEmail(BufferedReader reader, PrintWriter writer, int emailIndex) throws Exception {
         writer.println("RETR " + emailIndex);
         writer.flush();
         String response = reader.readLine();
@@ -92,27 +92,41 @@ public class Pop3MailService {
         
         String line;
         StringBuilder contentBuilder = new StringBuilder();
+        List<String> fileNameList = new ArrayList<String>();
+        
         boolean isBase64Content = false;
         boolean isReadingContent = false;
-
+        boolean isAttachedFile = false;
+        
         String sender = "";
         String subject = "";
 
         while (!(line = reader.readLine()).equals(".")) {
+
             if (line.startsWith("From:")) {
                 sender = line.substring(5).trim();
+                System.out.println(sender);
             } else if (line.startsWith("Subject:")) {
                 subject = line.substring(8).trim();
+            } else if(line.startsWith("--frontier")) {
+            	// 첨부 파일이나 plain text 등 전부 구분자로 따로 구분되어 전송됨
+            	// 따라서 설정 값 초기화
+            	isBase64Content = false;
+            	isAttachedFile = false;
             } else if (line.startsWith("Content-Transfer-Encoding:")) {
                 isBase64Content = line.toLowerCase().contains("base64");
+            } else if(line.startsWith("Content-Disposition: attachment")) {
+            	isAttachedFile = true;
+            	int nameIndex = line.indexOf("filename=");
+                fileNameList.add(line.substring(nameIndex + 9).replace("\"", "").trim());
             }
-
+            
             // 본문 내용 시작
             if (line.isEmpty()) {
                 isReadingContent = true;
                 continue;
             }
-
+            
             // 본문 내용 처리
             if (isReadingContent) {
                 if (isBase64Content) {
@@ -123,7 +137,8 @@ public class Pop3MailService {
             }
         }
         
-        // Base64로 인코딩된 경우 디코딩 후 본문 설정
+        
+        // Base64로 인코딩된 경우 디코딩 후 본문 설정 (첨부파일은 제외)
         String content;
         if (isBase64Content) {
             try {
@@ -136,7 +151,8 @@ public class Pop3MailService {
         } else {
             content = contentBuilder.toString();
         }
-        return new ReceiveEmail(sender, subject, content);
+        
+        return new ReceiveEmail(sender, subject, content, fileNameList);
     }
     
     

@@ -1,5 +1,6 @@
 
 import java.util.Base64;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -8,11 +9,13 @@ class ReceiveEmail {
     public String sender;
     public String subject;
     public String content;
+    public List<String> fileNameList;
 
-    public ReceiveEmail(String sender, String subject, String content) {
+    public ReceiveEmail(String sender, String subject, String content, List<String> fileNames) {
         this.sender = decodeMime(sender);
-        this.subject = subject;
+        this.subject = decodeMime(subject);
         this.content = extractPlainContent(content);
+        this.fileNameList = fileNames;
     }
 
     public String getSender() {
@@ -36,6 +39,15 @@ class ReceiveEmail {
     private String decodeMime(String encodedText) {
         if (encodedText.contains("=?UTF-8?B?")) {
             Pattern pattern = Pattern.compile("=\\?UTF-8\\?B\\?(.+?)\\?=");
+            Matcher matcher = pattern.matcher(encodedText);
+            if (matcher.find()) {
+                String base64Encoded = matcher.group(1);
+                byte[] decodedBytes = Base64.getDecoder().decode(base64Encoded);
+                return new String(decodedBytes);
+            }
+        }
+        else if(encodedText.contains("=?utf-8?B?")) {
+        	Pattern pattern = Pattern.compile("=\\?utf-8\\?B\\?(.+?)\\?=");
             Matcher matcher = pattern.matcher(encodedText);
             if (matcher.find()) {
                 String base64Encoded = matcher.group(1);

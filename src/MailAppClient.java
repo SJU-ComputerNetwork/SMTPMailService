@@ -72,7 +72,6 @@ public class MailAppClient extends JFrame{
 	public void changeMod() {
 		if (mode == 'c') {
 			mode = 'r';
-			pop3MailService.receiveMail();
 			receiverPanel.fetchReceiveMail();
 			showReceiverPanel();
 		}
