@@ -63,7 +63,7 @@ public class MailAppClient extends JFrame{
 	
 	public void showReceiverPanel() {
 		cardLayout.show(mainPanel, "ReceiverPanel");
-		setSize(600, 400);
+		setSize(600, 500);
 	}
 	
 	
