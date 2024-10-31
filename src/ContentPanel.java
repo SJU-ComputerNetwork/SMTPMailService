@@ -70,10 +70,16 @@ class ContentPanel extends JPanel {
         sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                smtpMailService.sendMail(senderField.getText(), receiverField.getText(), subjectField.getText(), contentArea.getText(), selectedFiles.toArray(new File[0]));
+                boolean result = smtpMailService.sendMail(senderField.getText(), receiverField.getText(), subjectField.getText(), contentArea.getText(), selectedFiles.toArray(new File[0]));
+                
+                if(result) {
+                	receiverField.setText("");
+                    subjectField.setText("");
+                    contentArea.setText("");
+                    selectedFiles.clear();
+                }
             }
         });
-        
         
         // Subject 라벨 및 텍스트 필드
         subjectLabel = new JLabel("Subject");
@@ -97,10 +103,8 @@ class ContentPanel extends JPanel {
         fileField.setEditable(false);
         add(fileField);
         
-        
         fileSelector = new JFileChooser();
         fileSelector.setMultiSelectionEnabled(true);
-        
         
         attachButton = new JButton("파일 첨부");
         attachButton.setBounds(430, 90, 90, 30);
@@ -115,12 +119,12 @@ class ContentPanel extends JPanel {
 	                }
 	                StringBuilder fileNames = new StringBuilder();
 	                for (File file : selectedFiles) {
-	                    if (fileNames.length() > 0) fileNames.append("\n");
+	                    if (fileNames.length() > 0) 
+	                    	fileNames.append("\n");
 	                    fileNames.append(file.getName());
 	                }
 	                fileField.setText(fileNames.toString());
 	            }
-	            selectedFiles.clear();
 			}
 		});
         add(attachButton);

@@ -101,7 +101,7 @@ public class SmtpMailService {
     }
     
 
-    public void sendMail(String sender, String receiver, String subject, String content, File[] attachedFile) {
+    public boolean sendMail(String sender, String receiver, String subject, String content, File[] attachedFile) {
     	
     	try(
     			SSLSocket smtpSocket = (SSLSocket) ((SSLSocketFactory) SSLSocketFactory.getDefault()).createSocket(smtpServer, smtpPort);
@@ -118,7 +118,6 @@ public class SmtpMailService {
             writer.flush();
             if (reader.readLine().startsWith("2")) {
                 JOptionPane.showMessageDialog(null, "메일이 성공적으로 발송되었습니다!", "성공", JOptionPane.INFORMATION_MESSAGE);
-                return;
             }
             else {
             	throw new Exception("QUIT 명령어 전송에 실패하였습니다.");
@@ -130,8 +129,9 @@ public class SmtpMailService {
     		if (e instanceof LoginException) {
     			mailAppClient.showLoginPanel();
     		}
-    		return;
+    		return false;
     	}
+    	return true;
     }
 
     
