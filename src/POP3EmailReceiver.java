@@ -1,9 +1,11 @@
+
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+
 
 public class POP3EmailReceiver {
     private static final String POP3_SERVER = "pop.naver.com";
