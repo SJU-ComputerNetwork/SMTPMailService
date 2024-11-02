@@ -137,7 +137,7 @@ class ContentPanel extends JPanel {
         changeMod.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				mailAppClient.changeMod();
+				mailAppClient.showReceiverPanel();
 			}
 		});
 	}
