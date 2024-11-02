@@ -20,8 +20,6 @@ public class MailAppClient extends JFrame{
 	private Pop3MailService pop3MailService;
 	private ReceiverPanel receiverPanel;
 	
-	private char mode = 'c';
-	
 	MailAppClient(){
 		smtpMailService = new SmtpMailService(this);
 		pop3MailService = new Pop3MailService(this);
@@ -67,20 +65,6 @@ public class MailAppClient extends JFrame{
 		cardLayout.show(mainPanel, "ReceiverPanel");
 		setSize(600, 500);
 	}
-	
-	
-	public void changeMod() {
-		if (mode == 'c') {
-			mode = 'r';
-			receiverPanel.fetchReceiveMail();
-			showReceiverPanel();
-		}
-		else if (mode == 'r') {
-			mode = 'c';
-			showContentPanel();
-		}
-	}
-	
 	
 	public static void main(String[] args) {
 		new MailAppClient();
