@@ -41,6 +41,13 @@ public class MailAppClient extends JFrame{
 		exitButton.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		exitButton.setPreferredSize(new Dimension(70, 30));	// 레이아웃 매니저가 크기를 관리하기 때문에, PreferredSize를 사용해야함
 		exitButton.setBackground(new Color(128, 128, 128, 150));
+
+		exitButton.addActionListener(new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+		        System.exit(0); // 애플리케이션 종료
+		    }
+		});
 		
 		JPanel exitButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		exitButtonPanel.add(exitButton);
