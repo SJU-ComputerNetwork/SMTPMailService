@@ -76,6 +76,7 @@ class ContentPanel extends JPanel {
                 	receiverField.setText("");
                     subjectField.setText("");
                     contentArea.setText("");
+			fileField.setText("");
                     selectedFiles.clear();
                 }
             }
