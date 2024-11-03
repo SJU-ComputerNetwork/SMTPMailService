@@ -37,7 +37,7 @@ class ReceiveEmail {
 
     // MIME 인코딩된 문자열을 디코딩
     private String decodeMime(String encodedText) {
-        if (encodedText.contains("=?UTF-8?B?")) {
+        if (encodedText.contains("=?UTF-8")) {
             Pattern pattern = Pattern.compile("=\\?UTF-8\\?B\\?(.+?)\\?=");
             Matcher matcher = pattern.matcher(encodedText);
             if (matcher.find()) {
@@ -46,7 +46,7 @@ class ReceiveEmail {
                 return new String(decodedBytes);
             }
         }
-        else if(encodedText.contains("=?utf-8?B?")) {
+        else if(encodedText.contains("=?utf-8")) {
         	Pattern pattern = Pattern.compile("=\\?utf-8\\?B\\?(.+?)\\?=");
             Matcher matcher = pattern.matcher(encodedText);
             if (matcher.find()) {
