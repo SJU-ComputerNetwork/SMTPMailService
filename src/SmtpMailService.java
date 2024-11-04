@@ -7,14 +7,15 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.swing.JOptionPane;
 
 public class SmtpMailService {
-	private MailAppClient mailAppClient;
+	private MailAppClient mailAppClient; //메일을 보내는 데 필요한 UI와 상태 관리 위함
 	
-	private static final String smtpServer = "smtp.naver.com";
-	private static final int smtpPort = 465;
+	private static final String smtpServer = "smtp.naver.com"; // 네이버의 SMTP 서버 주소
+	private static final int smtpPort = 465; // 네이버의 SMTP 포트 번호
  
-    private String encodedId;
-    private String encodedPassword;
-    
+    private String encodedId; // 사용자의 로그인 정보(ID)를 Base64로 인코딩하여 저장하는 필드
+    private String encodedPassword; //사용자의 로그인 정보(PW)를 Base64로 인코딩하여 저장하는 필드
+
+    // 생성자
     SmtpMailService(MailAppClient client){
     	mailAppClient = client;
     }
