@@ -62,7 +62,7 @@ public class Pop3MailService {
             // 최신 메일부터 MAX_EMAILS_COUNT개까지 읽어와서 ReceiveEmail 객체로 저장
             for (int i = totalEmailsCount; i > totalEmailsCount - retrieveCount; i--) {
                 ReceiveEmail email = fetchEmail(reader, writer, i);
-                if (email != null) {
+                if (email != null) {            	
                     emailList.add(email);
                 }
             }
@@ -93,96 +93,73 @@ public class Pop3MailService {
             return null;
         }
         
-        String line;
         
-        StringBuilder subjectBuilder = new StringBuilder();
         StringBuilder contentBuilder = new StringBuilder();
         List<String> fileNameList = new ArrayList<String>();
         
+        
+        boolean isHeader = true;
+        boolean isTextHeader = false;
+        boolean isContentReading = false;
+        
         boolean isBase64Content = false;
         boolean isReadingContent = false;
-        boolean isAttachedFile = false;
-        boolean isEntityBody = false;
-        boolean isMultiPart = false;
         
+        String line;
         String sender = "";
         String subject = "";
+        String content = "";
         String boundary = "";
-
+        String encodingMethod = "";
+        
         while (!(line = reader.readLine()).equals(".")) {
-            boundary = "";
-            isMultiPart = false;
-            isEntityBody = false;
-        	
-        	
-        	// 응답 메시지 Header 처리 부분
+
             if (line.startsWith("From:")) {
             	sender = senderStringBulider(reader, line);
             } else if (line.startsWith("Subject:")) {
                 subject = subjectStringBulider(reader, line);
+            } else if (line.startsWith("Content-Transfer-Encoding:")) {
+            	if(line.toLowerCase().contains("base")) {
+            		encodingMethod = "base";
+            	}else if(line.toLowerCase().contains("quote")) {
+            		encodingMethod = "quote";
+            	}else if(line.toLowerCase().contains("bit")){
+            		encodingMethod = "bit";
+            	}else {
+            		encodingMethod = "";
+            	}
+            	
+                isBase64Content = encodingMethod.length() > 0;
             }
             
-            /*
-            else if(isEntityBody == false && line.startsWith("Content-Type")){
-            	// 메시지 유형이 multipart인 경우 (ex : 파일첨부, text 같이 둘 이상의 종류의 데이터가 수신된 경우)
-            	if(line.contains("multipart")) {
-                	Pattern pattern = Pattern.compile("boundary=\"([^\"]+)\"");
-                    Matcher matcher = pattern.matcher(line);
-                    if(matcher.find()) {
-                    	boundary = matcher.group(1);
-                    	isMultiPart = true;
-                    }
-            	}
-            	isEntityBody = true;
-            	continue;
+            
+            // 본문 내용 시작
+            if (line.isEmpty()) {
+                isReadingContent = true;
+                continue;
             }
 
-            // 응답메세지 Body 처리
-            if(isEntityBody == true && isMultiPart == true) {
-            	
-        	}else if(isEntityBody == true && isMultiPart == false) {
-        		
-        		// 본문 내용 시작
-                if (line.isEmpty()) {
-                    isReadingContent = true;
-                    continue;
+            // 본문 내용 처리
+            if (isReadingContent) {
+                if (isBase64Content) {
+                    contentBuilder.append(line);
+                } else {
+                    contentBuilder.append(line).append("\n");
                 }
-                
-                // 본문 내용 처리
-                if (isReadingContent) {
-                    if (isBase64Content) {
-                        contentBuilder.append(line);
-                    } else {
-                        contentBuilder.append(line).append("\n");
-                    }
-                }
-        	}
-               		
-            if(line.startsWith(boundary)) {
-            	// 첨부 파일이나 plain text 등 전부 구분자로 따로 구분되어 전송됨
-            	// 따라서 설정 값 초기화
-            	isBase64Content = false;
-            	isAttachedFile = false;
-            	System.out.println(boundary);
-            } else if (line.startsWith("Content-Transfer-Encoding:")) {
-                isBase64Content = line.toLowerCase().contains("base64");
-            } else if(line.startsWith("Content-Disposition: attachment")) {
-            	isAttachedFile = true;
-            	int nameIndex = line.indexOf("filename=");
-                fileNameList.add(line.substring(nameIndex + 9).replace("\"", "").trim());
             }
-            */
+            
+            content = contentBuilder.toString();
+        
         }
         
-        
-        contentBuilder.append("test");
-        // Base64로 인코딩된 경우 디코딩 후 본문 설정 (첨부파일은 제외)
-        String content = contentBuilder.toString();
-        
-
-        return new ReceiveEmail(sender, subject, content, fileNameList);
+        if(encodingMethod.equals("quote")) {
+        	return null;
+        }
+        return new ReceiveEmail(sender, subject, content, encodingMethod, fileNameList);
     }
     
+        
+        
     private String senderStringBulider(BufferedReader reader, String line) throws Exception{
     	StringBuilder senderBuilder = new StringBuilder();
     	Pattern pattern = Pattern.compile("=\\?([A-Za-z0-9-]+)\\?(B|Q)\\?([A-Za-z0-9+/=._-]+)\\?=");
@@ -231,16 +208,7 @@ public class Pop3MailService {
     }
     
     
-    
-    private void processMultiPartMessage(BufferedReader reader, PrintWriter writer) {
-    	
-    }
-    
-    private void processSinglePartMessage(BufferedReader reader, PrintWriter writer) {
-    	
-    }
-    
-    
+
     
     
     // 응답 메세지를 확인한 후, pop3의 응답 코드로 +OK를 받지 않으면 예외를 던짐

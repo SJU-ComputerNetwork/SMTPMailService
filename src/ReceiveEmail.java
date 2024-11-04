@@ -12,7 +12,7 @@ class ReceiveEmail {
     public String content;
     public List<String> fileNameList;
 
-    public ReceiveEmail(String sender, String subject, String content, List<String> fileNames) {
+    public ReceiveEmail(String sender, String subject, String content, String encodingMethod, List<String> fileNames) {
         this.sender = decodeMime(sender);
         this.subject = decodeMime(subject);
         this.content = extractPlainContent(content);
