@@ -102,6 +102,7 @@ public class Pop3MailService {
         boolean isTextHeader = false;
         boolean isContentReading = false;
         
+        boolean isAttachedFile = false;
         boolean isBase64Content = false;
         boolean isReadingContent = false;
         
@@ -128,8 +129,11 @@ public class Pop3MailService {
             	}else {
             		encodingMethod = "";
             	}
-            	
                 isBase64Content = encodingMethod.length() > 0;
+            } else if(line.startsWith("Content-Disposition: attachment")) {
+            	isAttachedFile = true;
+            	int nameIndex = line.indexOf("filename=");
+                fileNameList.add(line.substring(nameIndex + 9).replace("\"", "").trim());
             }
             
             
