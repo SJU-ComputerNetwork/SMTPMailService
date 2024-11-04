@@ -1,4 +1,5 @@
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.List;
@@ -40,13 +41,19 @@ class ReceiveEmail {
     
     public String decodeMime(String encodedText) {
         StringBuilder decodedText = new StringBuilder();
-        Pattern pattern = Pattern.compile("=\\?(UTF-8|utf-8)\\?B\\?(.+?)\\?=");
+        Pattern pattern = Pattern.compile("=\\?(UTF-8|utf-8|euc-kr)\\?B\\?(.+?)\\?=");
         Matcher matcher = pattern.matcher(encodedText);
 
-        while (matcher.find()) {
-            String base64Encoded = matcher.group(2); // 인코딩된 텍스트 부분만 추출
-            byte[] decodedBytes = Base64.getDecoder().decode(base64Encoded);
-            decodedText.append(new String(decodedBytes)); // 디코딩한 텍스트를 추가
+        try {
+        	while (matcher.find()) {
+                String base64Encoded = matcher.group(2); // 인코딩된 텍스트 부분만 추출
+                byte[] decodedBytes = Base64.getDecoder().decode(base64Encoded);
+                decodedText.append(new String(decodedBytes, matcher.group(1))); // 디코딩한 텍스트를 추가
+                // 원리는 잘 모르겠는데 euc-kr의 경우 new String에서 matcher.group(1)으로 euc-kr을 지정을 안해주면 글자가 깨짐
+            }
+        }
+        catch (UnsupportedEncodingException e) {
+        	e.printStackTrace();
         }
 
         // 디코딩된 텍스트를 반환하거나 디코딩할 부분이 없으면 원본 반환
