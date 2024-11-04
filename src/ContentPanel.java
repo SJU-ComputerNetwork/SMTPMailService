@@ -130,17 +130,6 @@ class ContentPanel extends JPanel {
 		});
         add(attachButton);
         
-        //송신 - 수신 변환 버튼
-        JButton changeMod = new JButton("수신함");
-        changeMod.setBounds(440, 20, 100, 50);
-        add(changeMod);
-        
-        changeMod.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				mailAppClient.showReceiverPanel();
-			}
-		});
 	}
 
 }

@@ -9,12 +9,10 @@ public class LoginPanel extends JPanel {
 	
 	private MailAppClient mailAppClient;
 	private SmtpMailService smtpMailService;
-	private Pop3MailService pop3MailService;
 	
-	LoginPanel(MailAppClient client, SmtpMailService smtpService, Pop3MailService pop3Service){
+	LoginPanel(MailAppClient client, SmtpMailService smtpService){
 		mailAppClient = client;
 		smtpMailService = smtpService;
-		pop3MailService = pop3Service;
 		setLayout(new BorderLayout(0, 0));
 		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
 
@@ -99,7 +97,6 @@ public class LoginPanel extends JPanel {
             	char[] passwordChars = passwordField.getPassword();
                 String passwordString = new String(passwordChars);
                 smtpMailService.cachingLoginInfo(idString, passwordString);
-                pop3MailService.cachingLoginInfo(idString, passwordString);
                 mailAppClient.showContentPanel();
             }
         });
