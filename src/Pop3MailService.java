@@ -2,17 +2,20 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.swing.JOptionPane;
+
 
 public class Pop3MailService {
 	private MailAppClient mailAppClient;
 	
 	private static final String pop3Server = "pop.naver.com";
     private static final int pop3Port = 995;
-    private static final int MAX_EMAILS_COUNT = 10;
+    private static final int MAX_EMAILS_COUNT = 30;
     
     private String encodedId;
     private String encodedPassword;
@@ -91,28 +94,76 @@ public class Pop3MailService {
         }
         
         String line;
+        
+        StringBuilder subjectBuilder = new StringBuilder();
         StringBuilder contentBuilder = new StringBuilder();
         List<String> fileNameList = new ArrayList<String>();
         
         boolean isBase64Content = false;
         boolean isReadingContent = false;
         boolean isAttachedFile = false;
+        boolean isEntityBody = false;
+        boolean isMultiPart = false;
         
         String sender = "";
         String subject = "";
+        String boundary = "";
 
         while (!(line = reader.readLine()).equals(".")) {
-
+            boundary = "";
+            isMultiPart = false;
+            isEntityBody = false;
+        	
+        	
+        	// 응답 메시지 Header 처리 부분
             if (line.startsWith("From:")) {
-                sender = line.substring(5).trim();
-                System.out.println(sender);
+            	sender = senderStringBulider(reader, line);
             } else if (line.startsWith("Subject:")) {
-                subject = line.substring(8).trim();
-            } else if(line.startsWith("--frontier")) {
+                subject = subjectStringBulider(reader, line);
+            }
+            
+            /*
+            else if(isEntityBody == false && line.startsWith("Content-Type")){
+            	// 메시지 유형이 multipart인 경우 (ex : 파일첨부, text 같이 둘 이상의 종류의 데이터가 수신된 경우)
+            	if(line.contains("multipart")) {
+                	Pattern pattern = Pattern.compile("boundary=\"([^\"]+)\"");
+                    Matcher matcher = pattern.matcher(line);
+                    if(matcher.find()) {
+                    	boundary = matcher.group(1);
+                    	isMultiPart = true;
+                    }
+            	}
+            	isEntityBody = true;
+            	continue;
+            }
+
+            // 응답메세지 Body 처리
+            if(isEntityBody == true && isMultiPart == true) {
+            	
+        	}else if(isEntityBody == true && isMultiPart == false) {
+        		
+        		// 본문 내용 시작
+                if (line.isEmpty()) {
+                    isReadingContent = true;
+                    continue;
+                }
+                
+                // 본문 내용 처리
+                if (isReadingContent) {
+                    if (isBase64Content) {
+                        contentBuilder.append(line);
+                    } else {
+                        contentBuilder.append(line).append("\n");
+                    }
+                }
+        	}
+               		
+            if(line.startsWith(boundary)) {
             	// 첨부 파일이나 plain text 등 전부 구분자로 따로 구분되어 전송됨
             	// 따라서 설정 값 초기화
             	isBase64Content = false;
             	isAttachedFile = false;
+            	System.out.println(boundary);
             } else if (line.startsWith("Content-Transfer-Encoding:")) {
                 isBase64Content = line.toLowerCase().contains("base64");
             } else if(line.startsWith("Content-Disposition: attachment")) {
@@ -120,40 +171,76 @@ public class Pop3MailService {
             	int nameIndex = line.indexOf("filename=");
                 fileNameList.add(line.substring(nameIndex + 9).replace("\"", "").trim());
             }
-            
-            // 본문 내용 시작
-            if (line.isEmpty()) {
-                isReadingContent = true;
-                continue;
-            }
-            
-            // 본문 내용 처리
-            if (isReadingContent) {
-                if (isBase64Content) {
-                    contentBuilder.append(line);
-                } else {
-                    contentBuilder.append(line).append("\n");
-                }
-            }
+            */
         }
         
         
+        contentBuilder.append("test");
         // Base64로 인코딩된 경우 디코딩 후 본문 설정 (첨부파일은 제외)
-        String content;
-        if (isBase64Content) {
-            try {
-                byte[] decodedBytes = Base64.getDecoder().decode(contentBuilder.toString());
-                content = new String(decodedBytes);
-            } catch (Exception e) {
-                System.err.println("[POP3 에러] Base64 디코딩 오류: " + e.getMessage());
-                content = "[내용 디코딩 오류]";
-            }
-        } else {
-            content = contentBuilder.toString();
-        }
+        String content = contentBuilder.toString();
         
+
         return new ReceiveEmail(sender, subject, content, fileNameList);
     }
+    
+    private String senderStringBulider(BufferedReader reader, String line) throws Exception{
+    	StringBuilder senderBuilder = new StringBuilder();
+    	Pattern pattern = Pattern.compile("=\\?([A-Za-z0-9-]+)\\?(B|Q)\\?([A-Za-z0-9+/=._-]+)\\?=");
+        Matcher matcher = pattern.matcher(line);
+        
+        //인코딩된 문자열일 경우, 여러 줄로 올 가능성이 있으므로 반복문을 통해 해당 헤더에 해당하는 내용 전부 추출
+        if(matcher.find()) {
+        	senderBuilder.append(line.substring(5).trim());	// 5 -> "From:"
+        	line = reader.readLine();
+        	
+        	// 다음 줄이 공백으로 시작하면 헤더의 연속 줄로 간주
+        	while((line.startsWith(" ") || line.startsWith("\t"))) {
+        		senderBuilder.append(line.trim());
+        		line = reader.readLine();
+        	}
+        }else {
+        	//인코딩되지 않은 경우, readLine()으로 한번에 처리
+        	senderBuilder.append(line.substring(5).trim());
+        }
+        
+        return senderBuilder.toString();
+    }
+    
+    
+    private String subjectStringBulider(BufferedReader reader, String line) throws Exception{
+    	StringBuilder subjectBuilder = new StringBuilder();
+    	Pattern pattern = Pattern.compile("=\\?([A-Za-z0-9-]+)\\?(B|Q)\\?([A-Za-z0-9+/=._-]+)\\?=");
+        Matcher matcher = pattern.matcher(line);
+        
+        //인코딩된 문자열일 경우, 여러 줄로 올 가능성이 있으므로 반복문을 통해 해당 헤더에 해당하는 내용 전부 추출
+        if(matcher.find()) {
+        	subjectBuilder.append(line.substring(8).trim());	// 8 -> "Sender:"
+        	line = reader.readLine();
+        	
+        	// 다음 줄이 공백으로 시작하면 헤더의 연속 줄로 간주
+        	while((line.startsWith(" ") || line.startsWith("\t"))) {
+        		subjectBuilder.append(line.trim());
+        		line = reader.readLine();
+        	}
+        }else {
+        	//인코딩되지 않은 경우, readLine()으로 한번에 처리
+        	subjectBuilder.append(line.substring(8).trim());
+        }
+        
+        return subjectBuilder.toString();
+    }
+    
+    
+    
+    private void processMultiPartMessage(BufferedReader reader, PrintWriter writer) {
+    	
+    }
+    
+    private void processSinglePartMessage(BufferedReader reader, PrintWriter writer) {
+    	
+    }
+    
+    
     
     
     // 응답 메세지를 확인한 후, pop3의 응답 코드로 +OK를 받지 않으면 예외를 던짐

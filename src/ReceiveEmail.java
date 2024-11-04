@@ -1,4 +1,5 @@
 
+import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -35,29 +36,26 @@ class ReceiveEmail {
         return "Sender: " + sender + "\nSubject: " + subject + "\nContent: " + content;
     }
 
-    // MIME 인코딩된 문자열을 디코딩
-    private String decodeMime(String encodedText) {
-        if (encodedText.contains("=?UTF-8")) {
-            Pattern pattern = Pattern.compile("=\\?UTF-8\\?B\\?(.+?)\\?=");
-            Matcher matcher = pattern.matcher(encodedText);
-            if (matcher.find()) {
-                String base64Encoded = matcher.group(1);
-                byte[] decodedBytes = Base64.getDecoder().decode(base64Encoded);
-                return new String(decodedBytes);
-            }
+    
+    
+    public String decodeMime(String encodedText) {
+        StringBuilder decodedText = new StringBuilder();
+        Pattern pattern = Pattern.compile("=\\?(UTF-8|utf-8)\\?B\\?(.+?)\\?=");
+        Matcher matcher = pattern.matcher(encodedText);
+
+        while (matcher.find()) {
+            String base64Encoded = matcher.group(2); // 인코딩된 텍스트 부분만 추출
+            byte[] decodedBytes = Base64.getDecoder().decode(base64Encoded);
+            decodedText.append(new String(decodedBytes)); // 디코딩한 텍스트를 추가
         }
-        else if(encodedText.contains("=?utf-8")) {
-        	Pattern pattern = Pattern.compile("=\\?utf-8\\?B\\?(.+?)\\?=");
-            Matcher matcher = pattern.matcher(encodedText);
-            if (matcher.find()) {
-                String base64Encoded = matcher.group(1);
-                byte[] decodedBytes = Base64.getDecoder().decode(base64Encoded);
-                return new String(decodedBytes);
-            }
-        }
-        return encodedText; // 디코딩이 필요하지 않으면 그대로 반환
+
+        // 디코딩된 텍스트를 반환하거나 디코딩할 부분이 없으면 원본 반환
+        return decodedText.length() > 0 ? decodedText.toString() : encodedText;
     }
 
+   
+    
+    
     // 본문에서 필요한 `plain text` 내용만 추출
     private String extractPlainContent(String rawContent) {
         StringBuilder plainTextContent = new StringBuilder();
