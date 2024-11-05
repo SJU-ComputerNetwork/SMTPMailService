@@ -2,6 +2,7 @@ import javax.swing.JPanel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
 import java.util.Base64;
 
 import javax.swing.*;
@@ -15,6 +16,7 @@ public class LoginPanel extends JPanel {
 		smtpMailService = smtpService;
 		setLayout(new BorderLayout(0, 0));
 		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
+		// 윈도우 상하좌우 맨 끝에서 10픽셀씩 떨어진 곳에 내부 여백을 추가하고 실제로 경계선을 그리지는 않음
 
         add(createTitlePanel(), BorderLayout.NORTH);
         add(createDescriptionPanel(), BorderLayout.CENTER);
@@ -26,10 +28,11 @@ public class LoginPanel extends JPanel {
     private JPanel createTitlePanel() {
         JPanel titlePanel = new JPanel();
         titlePanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 0)); // Padding 추가
+        // 이 경우 상 20, 좌 10, 하 10, 우 0의 픽셀값을 가짐 (순서 중요)
         JLabel titleLabel = new JLabel("SMTP를 사용한 이메일 전송 앱");
         Font font = new Font("굴림", Font.BOLD, 20);
         titleLabel.setFont(font);
-        titleLabel.setHorizontalAlignment(JLabel.CENTER);
+        titleLabel.setHorizontalAlignment(JLabel.CENTER); // 가운데 정렬
         titlePanel.add(titleLabel);
         return titlePanel;
     }
@@ -47,8 +50,9 @@ public class LoginPanel extends JPanel {
                 "3. 서버 상황에 따라 가끔 접속이 안 될 수도 있습니다. 접속이 안되면 껐다가 다시 켜주세요.</html>");
         Font font = new Font("굴림", Font.BOLD, 13);
         descriptionLabel.setFont(font);
-        descriptionLabel.setHorizontalAlignment(JLabel.CENTER);
+        descriptionLabel.setHorizontalAlignment(JLabel.CENTER); // 가운데 정렬
         descriptionPanel.add(descriptionLabel, BorderLayout.NORTH);
+        // BorderLayout은 기본적으로 north, south, east, west, center의 다섯 개 영역으로 구성되어 있고, descriptionPanel을 north 영역에 추가
 
         return descriptionPanel;
     }
@@ -73,6 +77,7 @@ public class LoginPanel extends JPanel {
         passwordField.setBorder(BorderFactory.createLineBorder(Color.GREEN));
 
         // ID와 Password Field 배치
+        //gridx 와 gridy로 컴포넌트의 위치 설정
         gbc.gridx = 0;
         gbc.gridy = 0;
         inputSection.add(idLabel, gbc);
@@ -97,7 +102,9 @@ public class LoginPanel extends JPanel {
             	char[] passwordChars = passwordField.getPassword();
                 String passwordString = new String(passwordChars);
                 smtpMailService.cachingLoginInfo(idString, passwordString);
+                // 아이디 패스워드값을 인자로 해서 smtp login
                 mailAppClient.showContentPanel();
+                //로그인이 되면 메일 전송 패널을 보여주도록 함
             }
         });
         
